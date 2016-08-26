@@ -1,0 +1,16 @@
+This talk is billed for OO / imperative devs, but really its for any dev who is
+new to FP. However, if you're a dev, but not a FP dev, you're probably an OO
+dev. This talk assumes a basic level of programming compentency.
+
+It’s this thinking in terms of functions and parameterizing
+by behavior rather than state which is key to differentiating func‐
+tional programming from object-oriented programming. [1]
+
+There doesn't have to be a "Paradigm Pissing Contest". Each style of programming
+has its own strengths and weaknesses. Use the one that fits the situation.
+
+Immutability enables:
+  side-effect-free programming
+  inversion of control (giving the caller control, not the callee, makes code easier to understand) [19]
+
+*** Higher-order functions ***

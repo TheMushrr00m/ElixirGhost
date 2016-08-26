@@ -1,0 +1,125 @@
+Title Song! https://open.spotify.com/track/1lChCAu8B43bj0dlSrkH7t
+
+[0]
+Hudak, Paul (September 1989). "Conception, evolution, and application of
+functional programming languages" (PDF). ACM Computing Surveys. 21 (3): 359–411.
+doi:10.1145/72551.72554.
+http://www.dbnet.ece.ntua.gr/~adamo/languages/books/p359-hudak.pdf
+
+[0b] https://en.wikipedia.org/wiki/Functional_programming
+
+[0.2]
+https://maryrosecook.com/blog/post/a-practical-introduction-to-functional-programming
+
+[1] Object-Oriented vs Functional Programming
+Bridging the Divide Between Opposing Paradigms
+Richard Warburton
+http://www.oreilly.com/programming/free/object-oriented-vs-functional-programming.csp
+http://www.oreilly.com/programming/free/files/object-oriented-vs-functional-programming.pdf
+
+[2] Functional Thinking For The Imperative Mind
+Getting Your Feet Wet
+by Michael Bevilacqua-Linn
+https://pragprog.com/magazines/2012-08/functional-thinking-for-the-imperative-mind
+
+[2b]
+http://www.vasinov.com/blog/16-months-of-functional-programming/
+
+[3] From Imperative to Functional and Back-Monads are for Functional Languages
+Ron Pressier
+https://www.infoq.com/articles/Dont-graft-Monads-onto-Imperative-Languages
+
+[4] From Imperative to Functional Programming (for Absolute Beginners)
+Alex Bunardzic
+http://www.slideshare.net/alexbunardzic/from-imperative-to-functional-programming-43476397
+
+[5] Oo vs Functional
+(a wiki) (probably not useful)
+http://c2.com/cgi/wiki?OoVsFunctional
+
+[6] From Imperative to Functional: how to make the leap
+Loup Vaillant
+#recursion
+http://loup-vaillant.fr/tutorials/from-imperative-to-functional
+
+[7] Elixir Pipe Operator for Ruby: Chainable Methods
+AkitaOnRails
+http://www.akitaonrails.com/2016/02/18/elixir-pipe-operator-for-ruby-chainable-methods
+
+[8]
+http://elixir-lang.org/docs/stable/elixir/Kernel.html#%7C%3E/2
+
+[9] Transposing a Matrix: Thinking Recursively in Elixir
+J David Eisenberg
+http://langintro.com/elixir/article2/
+
+[10]
+How to Switch from the Imperative Mindset
+Eric Normand
+(do it gradually)
+http://www.lispcast.com/imperative-mindset
+
+[11]
+Learn You Haskell
+http://learnyouahaskell.com/introduction
+
+[12]
+https://www.quora.com/Is-object-immutability-in-functional-programming-inherently-performance-intensive
+
+[13]
+(seen here: https://www.quora.com/What-are-the-advantages-of-Functional-Programming-over-Object-Oriented-Programming)
+Why Functional Programming Matters
+John Hughes
+https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf
+
+[14]
+Myth of the Day: Functional Programmers Don't Use Loops
+kqr
+https://two-wrongs.com/myth-of-the-day-functional-programmers-dont-use-loops
+
+[15]
+http://elixir-lang.org/getting-started/recursion.html#loops-through-recursion
+
+[16]
+From Imperative to Functional and Back-Monads are for Functional Languages
+https://www.infoq.com/articles/Dont-graft-Monads-onto-Imperative-Languages
+
+[16b]
+https://www.quora.com/Why-are-functors-applicative-functors-and-monads-important-advantageous-in-functional-programming-not-looking-for-a-definition
+
+[17]
+Functors, Applicatives, and Monads in Pictures
+(Seen in 16)
+http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html
+
+[18]
+Pluralsight article on Elixir
+https://www.pluralsight.com/blog/software-development/elixir-is-for-programmers
+
+[19]
+Destroy All Ifs
+John A De Goes
+http://degoes.net/articles/destroy-all-ifs
+
+[20]
+Death to the IF statement
+http://haacked.com/archive/2013/11/08/death-to-the-if-statement.aspx/
+
+[20b]
+Refactoring Booleans to Functions
+https://gist.github.com/jdegoes/ed934ae6768519c1764e
+
+[21]
+Unconditional Programming
+http://michaelfeathers.typepad.com/michael_feathers_blog/2013/11/unconditional-programming.html
+
+[22]
+Introducing Elixir
+https://www.safaribooksonline.com/library/view/introducing-elixir/9781449369989/pr01.html
+
+[23]
+https://learnxinyminutes.com/docs/elixir/
+
+[24]
+Lambda calculus
+http://stackoverflow.com/questions/1112773/what-are-the-core-concepts-in-functional-programming
