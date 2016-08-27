@@ -123,3 +123,6 @@ https://learnxinyminutes.com/docs/elixir/
 [24]
 Lambda calculus
 http://stackoverflow.com/questions/1112773/what-are-the-core-concepts-in-functional-programming
+
+[24b
+http://www.inf.fu-berlin.de/lehre/WS03/alpi/lambda.pdf]
