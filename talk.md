@@ -12,16 +12,6 @@ This talk is billed for OO / imperative devs, but really its for any dev who is
 new to FP. However, if you're a dev, but not a FP dev, you're probably an OO
 dev. This talk assumes a basic level of programming compentency.
 
-- Making the Switch
-
-Much of the difference from OO that I noticed, I noticed because of something
-missing, such as control structures or statements, mainly when going through
-the Elixir Getting Started Guide [15].
-
-I've based my talk on the things I found missing... these "ghosts" of imperative
-programming. I'll discuss what replaces them, and the philosophy behind the
-replacement, and that will hopefully help you give up these ghosts.
-
 - Context 4!
 
 For context, I'll use a Connect 4 app. A brief history of that app...  It
@@ -36,6 +26,18 @@ Before I wrote the Elixir app, I also wrote it in Ruby because I felt it would
 be better to compare Elixir to Ruby since the syntax is so similar. This way
 there would be fewer differences in syntax to obscure the differences we're
 really interested in.
+
+- Making the Switch
+
+Much of the difference from OO that I noticed, I noticed because of something
+missing, such as control structures or statements, mainly when going through
+the Elixir Getting Started Guide [15].
+
+I've based my talk on the things I found missing... these "ghosts" of imperative
+programming. I'll discuss what replaces them, and the philosophy behind the
+replacement, and that will hopefully help you give up these ghosts. The important
+thing is not the ghost, but "what killed it", or in other words, the _reason_
+why the familiar thing is missing.
 
 
 ## What is Functional Programming?
@@ -85,32 +87,92 @@ Something to keep in mind. Functional programming, like other paradigms, can be
 seen as a bunch of habits that we apply during programming. [10] Also, this talk is
 about FP, rather than Elixir specifically. 
 
---------------------------------------------------------------------------------
+
+## Ghost 1: Objects
+
+Perhaps the most obvious difference from OO is that FP has no objects. {example -
+game is not an object}
+
+The philosophy behind objects is to represent the real world; objects have
+attributes, data associated with them, and ways to use them or change those
+attributes in specific ways, "methods". It is obviously antithetical to the
+tenets of FP to change those that data.
+
+```ruby
+class ConnectFour::Game
+  def initialize
+    @board = ConnectFour::Board.new
+    # other instance variables
+  end
+  
+  def play
+    while continue_game
+      get_move
+      handle_move
+    end
+    
+    display_result
+  end
+  # ...
+end
+
+ConnectFour::Game.new.play
+```
+
+```elixir
+defmodule ConnectFour do
+  def start(_type, _args) do
+    ConnectFour.initial_state
+    |> do_turn
+  end
+  
+  def do_turn(state) do
+    ConnectFour.IO.display_board(state[:board])
+    
+    case get_new_state() do
+      # ...
+      new_state ->
+        if ConnectFour.WinChecker.check(new_state[:board]) do
+          ConnectFour.IO.do_win(new_state)
+        else  
+          do_turn(new_state)
+        end
+    end
+  end
+
+ConnectFour.start
+```
+
+{Note: this is essentially pseudocode, it has been modified from the original}
+
+If you aren't familiar with the pipe operator `|>`, it is Elixir syntax which
+takes the result of the previous function and passes it as the first argument
+to the next function.
+
+(In the code,) we see the difference this makes. In imperative code, we create
+the `ConnectFour::Game` object, which holds instance variables, most importantly
+`@board`, though there are others in the actual code.
+
+In the imperative code, the game object's data can be freely modified anywhere
+else where it is in scope. Any code can just swoop down and change things.
+
+Contrast this with the functional code. We are required to pass the board state
+along. Remember, that's what `|>` does. The `start` function is equivalent to
+this:
+
+```elixir
+def start(_type, _args) do
+  state = initial_state
+  do_turn(state)
+end
+```
+
+`do_turn` is the function that really does all of the work, and you can see here
+too that we're constantly passing the board state along. It looks a little less
+clean, but it is fully explicit. You don't have to hold the state in your mind,
+because its right there in the file.
 
 
-## No Objects
-
-My goal is to help you make the switch from OO to FP. What will help you in that
-process is learning the differences between the two. The differences are in both
-the structure of the language itself, and in the way you use it to solve
-problems. It is more important, and probably more difficult, to get used to the
-latter.
-
-The most obvious difference from OO is that FP has no objects. {example - game
-is not an object}
-
-This means you can't chain method calls the way we can in Ruby, for instance.
-
-So what do we do? Of course we could nest function calls, but that's not fun.
-
-We can use the *pipe* for these situations. {example of pipe usage}
-
-Note that you can't assign the result of a chain of pipes to a variable. This is
-actually a good thing.
-
-In this situation, the entire chain should be a separate function. This
-encourages clean, modular code. {example} There are several ways FP encourages
-good code quality.
 
 
 ## Fewer Control Structures

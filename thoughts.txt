@@ -14,3 +14,6 @@ Immutability enables:
   inversion of control (giving the caller control, not the callee, makes code easier to understand) [19]
 
 *** Higher-order functions ***
+
+Something to keep in mind. Functional programming, like other paradigms, can be
+seen as a bunch of habits that we apply during programming. [10]
