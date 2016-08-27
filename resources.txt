@@ -53,6 +53,9 @@ http://elixir-lang.org/docs/stable/elixir/Kernel.html#%7C%3E/2
 J David Eisenberg
 http://langintro.com/elixir/article2/
 
+[9b]
+https://www.smashingmagazine.com/2014/07/dont-be-scared-of-functional-programming/
+
 [10]
 How to Switch from the Imperative Mindset
 Eric Normand
@@ -124,5 +127,11 @@ https://learnxinyminutes.com/docs/elixir/
 Lambda calculus
 http://stackoverflow.com/questions/1112773/what-are-the-core-concepts-in-functional-programming
 
-[24b
+[24b]
 http://www.inf.fu-berlin.de/lehre/WS03/alpi/lambda.pdf]
+
+[25]
+http://blog.jenkster.com/2015/12/what-is-functional-programming.html
+
+[pattern matching 1]
+http://stackoverflow.com/questions/2502354/what-is-pattern-matching-in-functional-languages

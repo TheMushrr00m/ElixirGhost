@@ -172,69 +172,10 @@ too that we're constantly passing the board state along. It looks a little less
 clean, but it is fully explicit. You don't have to hold the state in your mind,
 because its right there in the file.
 
+Object's murderer: immutability
 
 
-
-## Fewer Control Structures
-
-The Getting Started Guide [15] describes `if...else`, but auspiciously without
-an `elsif`. Searching the page for `else if`, I learned that `cond` is the
-closest thing to `else if` in Elixir. But I'm not here to walk you through the
-Getting Started guide. I'm here to philosophize about what I learned!
-
-The interesting question is why would a language eschew such seemingly
-fundamental control structures? Some articles I read later [16, 19] helped give
-me perspective on this.
-
-But sometimes seemingly complicated things become simpler when they're hands-on,
-or when someone else understands them a bit and explains them to you in a more
-practical way. Elixir is doing that.
-
-Actually, concepts from FP have been making their way into imperative langauges for
-some time. Lambda expressions are present in Ruby, Java since Java 8 [1] Strings
-are immutable in Python [0.2]
-
-> Libraries for employing monadic composition to chain I/O processing without
-blocking kernel threads have sprung up in imperative languages – the beautiful
-ReactiveX (C#, Java, JS), Node.js Promises (JS), Facebook's C++ Futures – and
-monadic composition has even found itself in the JDK itself, with the
-introduction of CompletionStage (and CompletableFuture which implements it) in
-Java 8.
-
-[16]
-
-Monads allow us to avoid callback hell!
-
-
-## Immutability
-
-Descriptivity implies immutability. If I've already said `x = 5`, I can't later
-say `x = 2`. What am I, some kind of liar? [11].
-
-You can reassign variables in OO languages because they're about *what to to*,
-not what things are. You can say "make x 5", and then "make x 2". But as
-descriptions, both cannot be true.
-
-Data in Elixir is immutable. If you're like me then, when you heard this, you
-thought that re-assigning variables is forbidden. {reassigning variables
-example} {luke and Yoda picture}
-
-This isn't the case. Variables only point to data. You can change these
-pointers. Doing so allocates a new location in memory, stores a new value there,
-and points the variable to that location. {animated diagram} [How is this
-different from OO? Can you change the data in-place in OO?]
-
-- Benefits
-
-With immutability, you can forget your fears of side effects.
-
-It also allows eliminates the need to copy data. If another variable is assigned
-to the value of an initial variable, they can both point to the same place, safe
-in the knowledge that no operation on either variable will result in the changing
-in the value of the other. [12]
-
-
-## Loops -> Recursion
+## Ghost 3: Loops
 
 - Loops
 
@@ -276,7 +217,7 @@ begin
 end while i_am_talking
 ```
 
-So after I read the getting started guide [15] and some articles [4, 9] and had
+So after I read the getting started guide [15] and some articles [4, 9, 9b] and had
 conversations with Elixirans, I gathered that recursion was important and
 assumed that there were no loops in Elixir. It turns out this isn't true! [14]
 However, I did spend some time practicing recursion, along with the other tools
@@ -315,3 +256,124 @@ gotten to pattern matching.]
 - Tail Recursion
 
 { Video: You've got one on your tail! }
+
+
+## Ghost 2: elsif
+{pattern matching}
+
+[https://www.quora.com/Why-dont-pure-functional-programming-languages-provide-a-loop-construct/answer/Tikhon-Jelvis]
+[http://stackoverflow.com/questions/25067231/why-dont-imperative-languages-have-pattern-matching]
+
+The Getting Started Guide [15] describes `if...else`, but auspiciously without
+an `elsif`. Searching the page for `else if`, I learned that `cond` is the
+closest thing to `else if` in Elixir.
+
+The interesting question is why would a language eschew such seemingly
+fundamental control structures? Again, the common theme is the principle of writing code
+that's easier to understand or "reason about".
+
+`elsif` enables one to create spaghetti code. With it, a single function can
+house logic for many different scenarios. Granted, you can achieve the same
+result by nesting another `if...else` in the `else` of the original `if...else`,
+but I think anyone faced with the monstrosity that would result will be
+compelled to look for a better way. Either that or they'll storm off saying
+"Elixir is stupid!".
+
+An article I read [19] helped give me perspective on this. It is entitled
+"Destroy All Ifs — A Perspective from Functional Programming".
+
+>The problem is not necessarily with conditionals: it’s with the boolean values
+that are required to use conditionals. A boolean value reduces a huge amount of
+information to a single bit (0 or 1). Then on the basis of that bit, the program
+makes a decision to take one path or a totally different one.
+
+The author is only partly serious about destroying _all_ if statements. Perhaps
+we could accuse him of engaging in click-bait, but that's another story. Going
+without `elsif` is not quite the same as going without `if` completely, but I
+believe the spirit is the same... it encourages us to write code that's easier
+for us to reason about, because it encourages _separation_, or modularization.
+
+The tool that Elixir gives us is _pattern matching_. Before I go on, I recognize
+that this talk is supposed to be about functional programming, and that this
+tool is, strictly speaking, a feature of Elixir.
+
+Pattern matching is not among the core principles of FP. But I feel that it
+follows in the spirit of FP so faithfully that its worth talking about. Also, it
+was too late for me to go back and change the abstract for my talk.
+
+```ruby
+def self.check(grid)
+  grid.each_with_index do |column, column_index|
+    n = 1
+    last = 0
+    column.each_with_index do |cell, row_index|
+      if cell == last && cell != 0
+        n += 1
+      else
+        n = 1
+      end
+      last = cell
+      
+      return true if n == 4
+    end
+  end
+```
+
+```elixir
+  def check_horizontal(board) do
+    Transpose.transpose(board)
+    |> check([])
+  end
+  
+  # First
+  def check(remaining, []) do
+    [next_row | other_rows] = remaining
+    check(other_rows, next_row)
+  end
+
+  # Middle
+  def check(remaining, row) do
+    if check_row(row) do
+      true
+    else
+      [next_row | other_rows] = remaining
+      check(other_rows, next_row)
+    end
+  end
+  
+  # End
+  def check([], row) do
+    check_row(row)
+  end
+```
+
+
+--------------------------------------------------------------------------------
+
+
+## Immutability
+
+Descriptivity implies immutability. If I've already said `x = 5`, I can't later
+say `x = 2`. What am I, some kind of liar? [11].
+
+You can reassign variables in OO languages because they're about *what to to*,
+not what things are. You can say "make x 5", and then "make x 2". But as
+descriptions, both cannot be true.
+
+Data in Elixir is immutable. If you're like me then, when you heard this, you
+thought that re-assigning variables is forbidden. {reassigning variables
+example} {luke and Yoda picture}
+
+This isn't the case. Variables only point to data. You can change these
+pointers. Doing so allocates a new location in memory, stores a new value there,
+and points the variable to that location. {animated diagram} [How is this
+different from OO? Can you change the data in-place in OO?]
+
+- Benefits
+
+With immutability, you can forget your fears of side effects.
+
+It also allows eliminates the need to copy data. If another variable is assigned
+to the value of an initial variable, they can both point to the same place, safe
+in the knowledge that no operation on either variable will result in the changing
+in the value of the other. [12]
