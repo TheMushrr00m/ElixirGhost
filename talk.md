@@ -172,7 +172,8 @@ too that we're constantly passing the board state along. It looks a little less
 clean, but it is fully explicit. You don't have to hold the state in your mind,
 because its right there in the file.
 
-- Immutability
+
+## Ghost 2: Mutability
 
 Descriptivity implies immutability. If I've already said `x = 5`, I can't later
 say `x = 2`. What am I, some kind of liar? [11].
@@ -187,8 +188,13 @@ example} {luke and Yoda picture}
 
 This isn't the case. Variables only point to data. You can change these
 pointers. Doing so allocates a new location in memory, stores a new value there,
-and points the variable to that location. {animated diagram} [How is this
-different from OO? Can you change the data in-place in OO?]
+and points the variable to that location. {animated diagram}
+
+This became a theme I noticed. In practice, FP can be very similar to imperative
+languages, or at least in languages that aren't necessarily known as FP
+languages. This is in part because imperative languages (such as Ruby) have
+borrowed ideas from FP. [10, 10b] Thanks to this, you can get your feet wet in
+FP, in a language you already use!
 
 - Benefits
 
@@ -201,7 +207,7 @@ no operation on either variable will result in the changing in the value of the
 other. [12]
 
 
-## Ghost 2: elsif
+## Ghost 3: elsif
 {pattern matching}
 
 [https://www.quora.com/Why-dont-pure-functional-programming-languages-provide-a-loop-construct/answer/Tikhon-Jelvis]
@@ -339,7 +345,7 @@ function may use or ignore this value. He summarizes this by saying:
 [19]
 
 
-## Ghost 3: Loops
+## Ghost 4: Loops
 
 - Loops
 
@@ -512,10 +518,39 @@ calls itself, does so as the last subroutine. The compiler is able to call the
 function without creating a new stack frame.
 
 
-- There are loops!
+- There are "loops"!
 
-Later I found out that "there aren't loops in FP" isn't true! [14]
+After becoming a recursion master, I found out that "there aren't loops in FP"
+isn't true! [14] At least not quite. There are some constructs in Elixir that
+behave uncannily like loops, including algorithms in the `Enum` module, and list
+comprehensions.
 
-{Example of recursion (from Connect 4?)}
+Here is another instance of the trend that FP ideas are present in other
+languages. Ruby, what used to be my favorite language, has `map`, `reduce`, and
+`select`. These are known as higher-order functions; that is, functions that
+accept or return other functions.
 
---------------------------------------------------------------------------------
+```elixir
+Enum.reduce( (1..100), fn(x, acc) -> x + acc end )
+  # => 5050
+
+Enum.map( (1..5), fn(x) -> 2 * x end )
+  # => [2, 4, 6, 8, 10]
+
+Enum.filter( (1..5), fn(x) -> rem(x, 2) == 0 end )
+  # => [2, 4]
+```
+
+Examples of these in use in Elixir.
+
+They are not technically loops; they are implemented differently from those in
+imperative languages I don't know the details, but the main difference is
+immutability. It seems like much of the difference between the imperative
+languages _I'm_ used to and FP is under the hood.
+
+I was pleased to learn that I've been using FP principles all along, but I was
+also a tiny bit bummed, because it felt like that would leave me less to talk
+about. Eventually I realized that I shouldn't be upset that something is easier
+to learn that I expected. This means that more people can get into Elixir and
+Phoenix, and take advantage of their strengths (performance, scalability), with
+less work. That's a good thing!

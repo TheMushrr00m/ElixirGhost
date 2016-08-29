@@ -62,6 +62,13 @@ Eric Normand
 (do it gradually)
 http://www.lispcast.com/imperative-mindset
 
+
+[10b]
+https://www.sitepoint.com/functional-programming-techniques-with-ruby-part-i/
+
+[10c]
+http://stackoverflow.com/questions/3503846/higher-order-iterators-in-ruby/3507149#3507149
+
 [11]
 Learn You Haskell
 http://learnyouahaskell.com/introduction
