@@ -287,6 +287,14 @@ The `check` function has multiple clauses, each with a different signature. The
 precedence in matching is the order of appearance; so if a clause matches, no
 clauses below it will be attempted.
 
+The first clause applies if the second argument is an empty list, the second
+clause if the first argument is an empty list, and the last clause if neither
+argument is an empty list.
+
+This accomplishes the same effect as control-flow structures, but is easier to
+read. Let's have a look at the equivalent code implemented with control-flow
+structures for comparison.
+
 ```elixir
   def check(remaining, row) do
     if Enum.empty?(row) do
@@ -308,47 +316,34 @@ clauses below it will be attempted.
 ```
 
 
-
 `elsif` enables one to create spaghetti code. With it, a single function can
 house logic for many different scenarios. Granted, you can achieve the same
 result by nesting another `if...else` in the `else` of the original `if...else`,
 but I think anyone faced with the monstrosity that would result will be
-compelled to look for a better way. Either that or they'll storm off saying
-"Elixir is stupid!".
+compelled to look for a better way. (Either that or they'll storm off saying
+"Elixir is stupid!".)
 
-
---------------------------------------------------------------------------------
 
 - Inversion of Control
 
-An article I read [19] helped give me perspective on this. It is entitled
-"Destroy All Ifs — A Perspective from Functional Programming".
+An article I read [19] helped give me more perspective about why one might want
+to avoid conditionals. It is entitled "Destroy All Ifs — A Perspective from
+Functional Programming".
 
->The problem is not necessarily with conditionals: it’s with the boolean values
-that are required to use conditionals. A boolean value reduces a huge amount of
-information to a single bit (0 or 1). Then on the basis of that bit, the program
-makes a decision to take one path or a totally different one.
+John explains that in imperative languages, when you call a function, you give
+it control. In functional languages, control is _inverted to the caller_; a
+function does nothing except return a value (functional purity). The calling
+function may use or ignore this value. He summarizes this by saying:
 
->(I actually think this is a specialization of an even deeper principle — that
-code which destroys information is generally harder to reason about than code
-which does not.)
+>Code that inverts control to the caller is generally easier to understand.
 [19]
-
-The author is only partly serious about destroying _all_ if statements. Perhaps
-we could accuse him of engaging in click-bait, but that's another story. Going
-without `elsif` is not quite the same as going without `if` completely, but I
-believe the spirit is the same... it encourages us to write code that's easier
-for us to reason about, because it encourages _separation_, or modularization.
-
-
-
 
 
 ## Ghost 3: Loops
 
 - Loops
 
-Immutability can be great, but it has some profound implications on the way we
+Immutability is great, but it has some profound implications on the way we
 program. Let's take a look at one example. From discussions with Elixir users,
 and reading the getting started guide [15] and some articles [4, 9, 9b], I
 gathered that recursion was important and assumed that there were no loops in
@@ -393,17 +388,25 @@ In FP, loops are replaced by recursive functions!
 
 What is recursion?!
 
-{ Fibonacci example }
 ```elixir
-  # n - the ordinal number of the term in the sequence desired
-  # a, b - internal use; keeps track of last two terms
-def fibonacci(n, a \\ 0, b \\ 1) do
-  if n <= 0 do
-    a
-  else
-    fibonacci(n - 1, b, a + b)
+  def fibonacci(n) do
+    cond do
+      n == 0
+        0
+      n == 1
+        1
+      true ->
+        fibonacci(n, 0, 1)
+    end
   end
-end
+
+  def fibonacci(n, a, b) do
+    if n <= 0 do
+      a
+    else
+      fibonacci(n - 1, b, a + b)
+    end
+  end
 ```
 
 Recursion is when a function calls itself. The cycle of the function calling
@@ -412,21 +415,7 @@ result without calling itself. In the above example, we can determine the result
 when we have reached the term with the ordinal number (its position in the
 sequence) that we want.
 
-[Note: in this example, I'm using default arguments this way because we haven't
-gotten to pattern matching.]
-
-
-- Tail Recursion
-
-{ Video: You've got one on your tail! }
-
-- There are loops!
-
-Later I found out that "there aren't loops in FP" isn't true! [14]
-
-{Example of recursion (from Connect 4?)}
-
---------------------------------------------------------------------------------
+- Example
 
 ```ruby
 def self.check(grid)
@@ -446,7 +435,87 @@ def self.check(grid)
   end
 ```
 
-
 Here's how we check the Connect 4 grid for horizontal matches in Ruby; its
 extremely standard. We just iterate over the rows, and over the cells in each
 row, keeping track of consecutive same-colored pieces.
+
+
+```elixir
+  def check_horizontal(board) do
+    Transpose.transpose(board)
+    |> check([])
+  end
+
+  def check(remaining, []) do
+    [next_row | other_rows] = remaining
+    check(other_rows, next_row)
+  end
+  
+  def check([], row) do
+    check_row(row)
+  end
+
+  def check(remaining, row) do
+    if check_row(row) do
+      true
+    else
+      [next_row | other_rows] = remaining
+      check(other_rows, next_row)
+    end
+  end
+```
+
+You've already seen the corresponding Elixir code; I showed it when talking
+about pattern matching. This code uses recursion to check every row of the board
+(which is a 2D array) for four of a players pieces in a row.
+
+`check_horizontal` calls `check`, passing the board as the first argument and
+an empty list as the second. That means the first clause of `check` will be applied.
+There, we use pattern matching again to pull off the next row from the board.
+The remainder of the board is passed as arg 1, and the single row passed as arg 2.
+
+Note, we could also use pattern matching in the argument list to simplify this function:
+
+```elixir
+  def check([next_row | other_rows], []) do
+    check(other_rows, next_row)
+  end
+  
+  # Equivalent to:
+  def check(remaining, []) do
+    [next_row | other_rows] = remaining
+    check(other_rows, next_row)
+  end
+```
+
+With both arguments holding something, the third clause takes effect. Here, we
+check the single row for a win. If none is found, then just like the first
+clause, we peel off the next row from the board and pass the board and it
+separately to `check`.
+
+```elixir
+[next_row | other_rows] = remaining
+```
+
+Eventually, the board will be reduced to a single row. In this case,
+`other_rows` will be an empty list. The second clause will finally be in charge.
+There, all that's left to do is check that remaining row. If there are no wins
+there, then we can just return false.
+
+
+- Tail Recursion
+
+{ Video: You've got one on your tail! }
+
+I want to briefly mention _tail-recursion_. This means that a function that
+calls itself, does so as the last subroutine. The compiler is able to call the
+function without creating a new stack frame.
+
+
+- There are loops!
+
+Later I found out that "there aren't loops in FP" isn't true! [14]
+
+{Example of recursion (from Connect 4?)}
+
+--------------------------------------------------------------------------------
