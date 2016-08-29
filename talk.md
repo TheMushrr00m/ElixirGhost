@@ -74,9 +74,9 @@ In the same way, functional programming is meant to be a clearer approach to
 programming. This is achieved by treating functions (i.e. subroutines [3]) as
 descriptions of things rather than instructions [6].
 
-Descriptions do not change things, and so neither do functions in FP. The
-manifestations of this principal in FP are immutability and functional purity, which
-means freedom from side-effects. [0.2, 24]
+Descriptions do not change things (unless you're a god), and so neither do
+functions in FP. The manifestations of this principal in FP are immutability and
+functional purity, which means freedom from side-effects. [0.2, 24]
 
 In lambda calculus, functions are mathematical (though anonymous) objects.
 Similarly in FP, functions are first-class citizens. They can be passed around
@@ -172,7 +172,176 @@ too that we're constantly passing the board state along. It looks a little less
 clean, but it is fully explicit. You don't have to hold the state in your mind,
 because its right there in the file.
 
-Object's murderer: immutability
+- Immutability
+
+Descriptivity implies immutability. If I've already said `x = 5`, I can't later
+say `x = 2`. What am I, some kind of liar? [11].
+
+You can reassign variables in OO languages because they're about *what to do*,
+not what things are. You can say "make x 5", and then "make x 2". But as
+descriptions, both cannot be true.
+
+Data in Elixir is immutable. If you're like me then, when you heard this, you
+thought that re-assigning variables is forbidden. {reassigning variables
+example} {luke and Yoda picture}
+
+This isn't the case. Variables only point to data. You can change these
+pointers. Doing so allocates a new location in memory, stores a new value there,
+and points the variable to that location. {animated diagram} [How is this
+different from OO? Can you change the data in-place in OO?]
+
+- Benefits
+
+With immutability, you can forget your fears of side effects.
+
+It also eliminates the need to copy data, giving performance benefits. If
+another variable is assigned to the value of an initial variable, they can both
+point to the same place (memory reuse[Cardarella]), safe in the knowledge that
+no operation on either variable will result in the changing in the value of the
+other. [12]
+
+
+## Ghost 2: elsif
+{pattern matching}
+
+[https://www.quora.com/Why-dont-pure-functional-programming-languages-provide-a-loop-construct/answer/Tikhon-Jelvis]
+[http://stackoverflow.com/questions/25067231/why-dont-imperative-languages-have-pattern-matching]
+
+The Getting Started Guide [15] describes `if...else`, but auspiciously without
+an `elsif`. Searching the page for `else if`, I learned that `cond` is the
+closest thing to `else if` in Elixir.
+
+Elixir has the `cond` control structure, which
+the Getting Started guide says is "This is equivalent to else if clauses in many
+imperative languages (although used way less frequently here)." [15]
+
+```elixir
+  def find_top(col, n\\0) do
+    col_list = Tuple.to_list(col)
+    [h|t] = col_list
+    
+    cond do
+      !Enum.any?(t) && h != 0 ->
+        {:error}
+      h == 0 ->
+        {:ok, n}
+      true ->
+        List.to_tuple(t) |> find_top(n+1)
+    end
+  end
+```
+
+Here's an example from Connect 4 in Elixir
+
+- Pattern Matching
+
+Although there is an equivalent control structure, I still found it odd. Why
+would a language eschew such seemingly fundamental control structures? I thought
+there had to be more to it. Again, the common theme is the principle of writing
+code that's easier to understand or "reason about".
+
+Elixir gives us the tool of _pattern matching_. Aside: pattern matching is not
+(afaik) among the core principles of FP. But I feel that it follows in the
+spirit of FP so faithfully that its worth talking about. Also, it was too late
+for me to go back and change the abstract for my talk.
+
+```elixir
+  [h|t] = col_list
+```
+
+We saw pattern matching in the previous example. The pipe here is known as a
+"cons" operator, and it represents link between the two elements. In Elixir,
+Lists are implemented as linked lists; each node consisting of a value and a
+pointer to the next node. The `cons` represents that link to the next node. If
+this expression represents a match between the left side and right side, then
+`h` must be the first element of `col_list`, and  `t` the remainder. (The whole
+thing is called a *cons cell*)
+[http://elixir-lang.org/getting-started/basic-types.html]
+
+But pattern matching plays a much bigger role in Elixir. The most exciting
+(to me) is in function definitions! Let's see how pattern matching
+is used here.
+
+
+```elixir
+  def check(remaining, []) do
+    [next_row | other_rows] = remaining
+    check(other_rows, next_row)
+  end
+  
+  def check([], row) do
+    check_row(row)
+  end
+
+  def check(remaining, row) do
+    if check_row(row) do
+      true
+    else
+      [next_row | other_rows] = remaining
+      check(other_rows, next_row)
+    end
+  end
+```
+
+The `check` function has multiple clauses, each with a different signature. The
+precedence in matching is the order of appearance; so if a clause matches, no
+clauses below it will be attempted.
+
+```elixir
+  def check(remaining, row) do
+    if Enum.empty?(row) do
+      [next_row | other_rows] = remaining
+      check(other_rows, next_row)
+    else
+      if !Enum.empty?(remaining) do
+        check_row(row)
+      else
+        if check_row(row) do
+          true
+        else
+          [next_row | other_rows] = remaining
+          check(other_rows, next_row)
+        end
+      end
+    end
+  end
+```
+
+
+
+`elsif` enables one to create spaghetti code. With it, a single function can
+house logic for many different scenarios. Granted, you can achieve the same
+result by nesting another `if...else` in the `else` of the original `if...else`,
+but I think anyone faced with the monstrosity that would result will be
+compelled to look for a better way. Either that or they'll storm off saying
+"Elixir is stupid!".
+
+
+--------------------------------------------------------------------------------
+
+- Inversion of Control
+
+An article I read [19] helped give me perspective on this. It is entitled
+"Destroy All Ifs — A Perspective from Functional Programming".
+
+>The problem is not necessarily with conditionals: it’s with the boolean values
+that are required to use conditionals. A boolean value reduces a huge amount of
+information to a single bit (0 or 1). Then on the basis of that bit, the program
+makes a decision to take one path or a totally different one.
+
+>(I actually think this is a specialization of an even deeper principle — that
+code which destroys information is generally harder to reason about than code
+which does not.)
+[19]
+
+The author is only partly serious about destroying _all_ if statements. Perhaps
+we could accuse him of engaging in click-bait, but that's another story. Going
+without `elsif` is not quite the same as going without `if` completely, but I
+believe the spirit is the same... it encourages us to write code that's easier
+for us to reason about, because it encourages _separation_, or modularization.
+
+
+
 
 
 ## Ghost 3: Loops
@@ -180,7 +349,11 @@ Object's murderer: immutability
 - Loops
 
 Immutability can be great, but it has some profound implications on the way we
-program. Let's take a look at one example.
+program. Let's take a look at one example. From discussions with Elixir users,
+and reading the getting started guide [15] and some articles [4, 9, 9b], I
+gathered that recursion was important and assumed that there were no loops in
+Elixir. 
+
 
 ```ruby
 (1..100).each do |i|
@@ -199,31 +372,20 @@ So why can't we have loops like this? On each iteration, we would just create
 some new data, and point `i` to that data. It goes against the paradigm of
 modularity / purity.
 
-The loops we typically use in OO programming rely on mutability. Assuming the
-code inside the block is "pure", then it would evaluate the same way every time.
-That means either it will return on the first iteration, or it will never
-return. The former is indistinguishable from having no loop, and the latter is
-an infinite loop, which is usually not something we want.
-
 ```ruby
 while i_am_talking do
   be_nervous
 end
 ```
 
-```ruby
-begin
-  be_nervous
-end while i_am_talking
-```
+The loops we typically use in OO programming rely on mutability. Assuming the
+code inside the block is "pure", then it would evaluate the same way every time.
+That means either it will return on the first iteration, or it will never
+return. The former is indistinguishable from having no loop, and the latter is
+an infinite loop, which is usually not something we want.
 
-So after I read the getting started guide [15] and some articles [4, 9, 9b] and had
-conversations with Elixirans, I gathered that recursion was important and
-assumed that there were no loops in Elixir. It turns out this isn't true! [14]
-However, I did spend some time practicing recursion, along with the other tools
-of FP/Elixir.
-
-{Example of recursion (from Connect 4?)}
+Thinking that there were not loops in FP, I spent time practicing solving
+problems with recursion.
 
 - Recursion
 
@@ -233,8 +395,8 @@ What is recursion?!
 
 { Fibonacci example }
 ```elixir
-# n - the ordinal number of the term in the sequence desired
-# a, b - internal use; keeps track of last two terms
+  # n - the ordinal number of the term in the sequence desired
+  # a, b - internal use; keeps track of last two terms
 def fibonacci(n, a \\ 0, b \\ 1) do
   if n <= 0 do
     a
@@ -253,53 +415,18 @@ sequence) that we want.
 [Note: in this example, I'm using default arguments this way because we haven't
 gotten to pattern matching.]
 
+
 - Tail Recursion
 
 { Video: You've got one on your tail! }
 
+- There are loops!
 
-## Ghost 2: elsif
-{pattern matching}
+Later I found out that "there aren't loops in FP" isn't true! [14]
 
-[https://www.quora.com/Why-dont-pure-functional-programming-languages-provide-a-loop-construct/answer/Tikhon-Jelvis]
-[http://stackoverflow.com/questions/25067231/why-dont-imperative-languages-have-pattern-matching]
+{Example of recursion (from Connect 4?)}
 
-The Getting Started Guide [15] describes `if...else`, but auspiciously without
-an `elsif`. Searching the page for `else if`, I learned that `cond` is the
-closest thing to `else if` in Elixir.
-
-The interesting question is why would a language eschew such seemingly
-fundamental control structures? Again, the common theme is the principle of writing code
-that's easier to understand or "reason about".
-
-`elsif` enables one to create spaghetti code. With it, a single function can
-house logic for many different scenarios. Granted, you can achieve the same
-result by nesting another `if...else` in the `else` of the original `if...else`,
-but I think anyone faced with the monstrosity that would result will be
-compelled to look for a better way. Either that or they'll storm off saying
-"Elixir is stupid!".
-
-An article I read [19] helped give me perspective on this. It is entitled
-"Destroy All Ifs — A Perspective from Functional Programming".
-
->The problem is not necessarily with conditionals: it’s with the boolean values
-that are required to use conditionals. A boolean value reduces a huge amount of
-information to a single bit (0 or 1). Then on the basis of that bit, the program
-makes a decision to take one path or a totally different one.
-
-The author is only partly serious about destroying _all_ if statements. Perhaps
-we could accuse him of engaging in click-bait, but that's another story. Going
-without `elsif` is not quite the same as going without `if` completely, but I
-believe the spirit is the same... it encourages us to write code that's easier
-for us to reason about, because it encourages _separation_, or modularization.
-
-The tool that Elixir gives us is _pattern matching_. Before I go on, I recognize
-that this talk is supposed to be about functional programming, and that this
-tool is, strictly speaking, a feature of Elixir.
-
-Pattern matching is not among the core principles of FP. But I feel that it
-follows in the spirit of FP so faithfully that its worth talking about. Also, it
-was too late for me to go back and change the abstract for my talk.
+--------------------------------------------------------------------------------
 
 ```ruby
 def self.check(grid)
@@ -319,61 +446,7 @@ def self.check(grid)
   end
 ```
 
-```elixir
-  def check_horizontal(board) do
-    Transpose.transpose(board)
-    |> check([])
-  end
-  
-  # First
-  def check(remaining, []) do
-    [next_row | other_rows] = remaining
-    check(other_rows, next_row)
-  end
 
-  # Middle
-  def check(remaining, row) do
-    if check_row(row) do
-      true
-    else
-      [next_row | other_rows] = remaining
-      check(other_rows, next_row)
-    end
-  end
-  
-  # End
-  def check([], row) do
-    check_row(row)
-  end
-```
-
-
---------------------------------------------------------------------------------
-
-
-## Immutability
-
-Descriptivity implies immutability. If I've already said `x = 5`, I can't later
-say `x = 2`. What am I, some kind of liar? [11].
-
-You can reassign variables in OO languages because they're about *what to to*,
-not what things are. You can say "make x 5", and then "make x 2". But as
-descriptions, both cannot be true.
-
-Data in Elixir is immutable. If you're like me then, when you heard this, you
-thought that re-assigning variables is forbidden. {reassigning variables
-example} {luke and Yoda picture}
-
-This isn't the case. Variables only point to data. You can change these
-pointers. Doing so allocates a new location in memory, stores a new value there,
-and points the variable to that location. {animated diagram} [How is this
-different from OO? Can you change the data in-place in OO?]
-
-- Benefits
-
-With immutability, you can forget your fears of side effects.
-
-It also allows eliminates the need to copy data. If another variable is assigned
-to the value of an initial variable, they can both point to the same place, safe
-in the knowledge that no operation on either variable will result in the changing
-in the value of the other. [12]
+Here's how we check the Connect 4 grid for horizontal matches in Ruby; its
+extremely standard. We just iterate over the rows, and over the cells in each
+row, keeping track of consecutive same-colored pieces.

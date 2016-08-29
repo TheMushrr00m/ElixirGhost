@@ -135,3 +135,6 @@ http://blog.jenkster.com/2015/12/what-is-functional-programming.html
 
 [pattern matching 1]
 http://stackoverflow.com/questions/2502354/what-is-pattern-matching-in-functional-languages
+
+[Cardarella]
+http://confreaks.tv/videos/railsconf2016-rails-to-phoenix
